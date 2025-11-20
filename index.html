@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Трекер Кандидатов</title>
+  <style>
+    :root { --primary: #4f46e5; --primary-hover: #4338ca; --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --text-secondary: #64748b; --border: #e2e8f0; --danger: #ef4444; --success: #10b981; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5; }
+    .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+    header { background: var(--surface); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    h1 { margin: 0; font-size: 1.25rem; }
+    .tabs { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+    .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; background: var(--surface); border: none; border-bottom: 3px solid transparent; font-weight: 500; color: var(--text-secondary); }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #eff6ff; }
+    .content-section { display: none; }
+    .content-section.active { display: block; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+    input, textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
+    textarea { resize: vertical; min-height: 80px; }
+    .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-danger { background: transparent; color: var(--danger); }
+    .btn-danger:hover { background: #fef2f2; }
+    .btn-sm { padding: 4px 8px; font-size: 0.85rem; }
+    .candidate-item { display: flex; flex-direction: column; gap: 10px; }
+    .candidate-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: #f1f5f9; color: #475569; }
+    .badge.today { background: #dcfce7; color: #166534; }
+    .badge.tomorrow { background: #dbeafe; color: #1e40af; }
+    .badge.past { background: #fee2e2; color: #991b1b; }
+    .meta { font-size: 0.875rem; color: var(--text-secondary); display: flex; gap: 10px; align-items: center; }
+    .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .toast { position: fixed; top: 20px; right: 20px; background: var(--text); color: white; padding: 12px 24px; border-radius: 8px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000; }
+    .toast.show { opacity: 1; }
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    .stat-box { background: white; padding: 10px; border-radius: 6px; border: 1px solid var(--border); text-align: center; }
+    .stat-val { font-size: 1.2rem; font-weight: bold; }
+    .stat-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    small { color: #999; font-size: 0.85rem; }
+    @media (max-width: 600px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Трекер Кандидатов</h1>
+    <button class="btn btn-outline btn-sm" onclick="openSettings()" style="font-size:1.2rem;padding:5px 10px;">⚙</button>
+  </header>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('add')">Добавить</button>
+      <button class="tab" onclick="switchTab('active')">Активные <span id="activeCount"></span></button>
+      <button class="tab" onclick="switchTab('archive')">Архив</button>
+    </div>
+    <div id="add" class="content-section active">
+      <div class="card">
+        <h2>Новый кандидат</h2>
+        <form onsubmit="handleSubmit(event)">
+          <div class="form-group">
+            <label>ФИО *</label>
+            <input type="text" name="fio" required placeholder="Иванов Иван">
+          </div>
+          <div class="form-group">
+            <label>Объект *</label>
+            <input type="text" name="object" required placeholder="Офис">
+          </div>
+          <div class="form-group">
+            <label>Телефон *</label>
+            <input type="text" name="phone" required placeholder="+7...">
+          </div>
+          <div class="form-group">
+            <label>Дата выхода *</label>
+            <input type="date" name="startDate" required>
+          </div>
+          <div class="form-group">
+            <label>Примечание</label>
+            <textarea name="note" placeholder="Примечания"></textarea>
+          </div>
+          <button type="submit" class="btn">Добавить</button>
+        </form>
+      </div>
+    </div>
+    <div id="active" class="content-section">
+      <input type="text" placeholder="Поиск..." id="searchActive" onkeyup="renderActive()" style="margin-bottom:15px;">
+      <div id="statsBar" class="stats-bar"></div>
+      <div id="activeList"></div>
+    </div>
+    <div id="archive" class="content-section">
+      <input type="text" placeholder="Поиск..." id="searchArchive" onkeyup="renderArchive()" style="margin-bottom:15px;">
+      <div id="archiveList"></div>
+    </div>
+  </div>
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal">
+      <h2>Настройки</h2>
+      <div class="form-group">
+        <label>Google Sheets URL</label>
+        <input type="text" id="gsUrl" placeholder="https://script.google.com/..." onchange="saveSettings()">
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="enableTgNotif" onchange="saveSettings()"> Включить уведомления в Telegram</label>
+        <small>Работает когда браузер открыт</small>
+      </div>
+      <div class="form-group">
+        <label>Telegram Bot Token</label>
+        <input type="password" id="tgBotToken" placeholder="" onchange="saveSettings()">
+        <small>Сохраняется локально в браузере</small>
+      </div>
+      <div class="form-group">
+        <label>Telegram Chat ID</label>
+        <input type="text" id="tgChatId" placeholder="" onchange="saveSettings()">
+      </div>
+      <button class="btn" onclick="closeSettings()" style="width:100%">Закрыть</button>
+    </div>
+  </div>
+  <script>
+let data = JSON.parse(localStorage.getItem('candidate_reminder_app_data') || '{"candidates":[]}');
+let candidates = data.candidates || [];
+let googleSheetUrl = data.googleSheetUrl || '';
+let tgBotToken = localStorage.getItem('tg_bot_token') || '';
+let tgChatId = localStorage.getItem('tg_chat_id') || '';
+let enableTgNotif = localStorage.getItem('enable_tg') === 'true';
+const activeListEl = document.getElementById('activeList');
+const archiveListEl = document.getElementById('archiveList');
+const statsBarEl = document.getElementById('statsBar');
+const activeCountEl = document.getElementById('activeCount');
+document.getElementById('gsUrl').value = googleSheetUrl;
+document.getElementById('tgBotToken').value = tgBotToken;
+document.getElementById('tgChatId').value = tgChatId;
+document.getElementById('enableTgNotif').checked = enableTgNotif;
+renderAll();
+setInterval(checkReminders, 60000);
+checkReminders();
+function switchTab(tabId){document.querySelectorAll('.content-section').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));document.getElementById(tabId).classList.add('active');const tabs=['add','active','archive'];document.querySelectorAll('.tab')[tabs.indexOf(tabId)].classList.add('active');if(tabId==='active')renderActive();if(tabId==='archive')renderArchive();}
+function handleSubmit(e){e.preventDefault();const form=e.target;const newItem={id:Date.now().toString(),fio:form.fio.value,object:form.object.value,phone:form.phone.value,startDate:form.startDate.value,note:form.note.value,status:'active',createdAt:new Date().toISOString()};candidates.push(newItem);save();form.reset();showToast('Кандидат добавлен');switchTab('active');}
+function save(){localStorage.setItem('candidate_reminder_app_data',JSON.stringify({candidates,googleSheetUrl}));renderAll();syncToGoogle();}
+function saveSettings(){googleSheetUrl=document.getElementById('gsUrl').value.trim();tgBotToken=document.getElementById('tgBotToken').value;tgChatId=document.getElementById('tgChatId').value;enableTgNotif=document.getElementById('enableTgNotif').checked;localStorage.setItem('tg_bot_token',tgBotToken);localStorage.setItem('tg_chat_id',tgChatId);localStorage.setItem('enable_tg',enableTgNotif.toString());save();showToast('Настройки сохранены');}
+function openSettings(){document.getElementById('settingsModal').classList.add('open');}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open');}
+function syncToGoogle(){if(!googleSheetUrl)return;fetch(googleSheetUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(candidates)}).catch(err=>console.log(err));}
+function updateStatus(id,status){const c=candidates.find(x=>x.id===id);if(c){c.status=status;save();showToast(status==='done'?'В архив':'Активен');}}
+function remove(id){if(confirm('Удалить?')){candidates=candidates.filter(x=>x.id!==id);save();showToast('Удалено');}}
+function edit(id){const c=candidates.find(x=>x.id===id);if(!c)return;const newFio=prompt('ФИО:',c.fio);if(newFio===null)return;c.fio=newFio;c.object=prompt('Объект:',c.object)||c.object;c.phone=prompt('Телефон:',c.phone)||c.phone;c.startDate=prompt('Дата (YYYY-MM-DD):',c.startDate)||c.startDate;c.note=prompt('Инфо:',c.note)||c.note;save();showToast('Обновлено');}
+function addToCalendar(id){const c=candidates.find(x=>x.id===id);if(!c)return;const text=encodeURIComponent(`Выход: ${c.fio} (${c.object})`);const details=encodeURIComponent(`Тел: ${c.phone}\nИнфо: ${c.note}`);const dateStr=c.startDate.replace(/-/g,'');const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&details=${details}&dates=${dateStr}/${dateStr}`;window.open(url,'_blank');}
+function shareToTG(id){const c=candidates.find(x=>x.id===id);if(!c)return;const text=encodeURIComponent(`👤 *Новый кандидат*\nФИО: ${c.fio}\nОбъект: ${c.object}\nТел: ${c.phone}\n📅 ${c.startDate}`);window.open(`https://t.me/share/url?url=&text=${text}`,'_blank');}
+function sendTGNotif(msg){if(!enableTgNotif||!tgBotToken||!tgChatId)return;fetch(`https://api.telegram.org/bot${tgBotToken}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:tgChatId,text:msg})}).catch(e=>console.log('TG error:',e));}
+function checkReminders(){const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());const tomorrow=new Date(today);tomorrow.setDate(today.getDate()+1);const lastCheck=localStorage.getItem('last_reminder_check')||'';const todayStr=today.toISOString().split('T')[0];if(lastCheck===todayStr)return;localStorage.setItem('last_reminder_check',todayStr);candidates.filter(c=>c.status==='active').forEach(c=>{const d=new Date(c.startDate);const checkDate=new Date(d.getFullYear(),d.getMonth(),d.getDate());if(checkDate.getTime()===tomorrow.getTime()){sendTGNotif(`⏰ Завтра выходит ${c.fio}`);}if(checkDate.getTime()===today.getTime()){sendTGNotif(`📍 Выходит сегодня ${c.fio}`);}});}
+function renderAll(){renderActive();renderArchive();updateStats();}
+function renderActive(){const term=(document.getElementById('searchActive')?.value||'').toLowerCase();const list=candidates.filter(c=>c.status==='active'&&(c.fio.toLowerCase().includes(term)||c.object.toLowerCase().includes(term)));list.sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));activeListEl.innerHTML=list.length?list.map(c=>createCard(c)).join(''):'<div style="text-align:center;color:#888;padding:20px;">Нет данных</div>';}
+function renderArchive(){const term=(document.getElementById('searchArchive')?.value||'').toLowerCase();const list=candidates.filter(c=>c.status==='done'&&(c.fio.toLowerCase().includes(term)||c.object.toLowerCase().includes(term)));list.sort((a,b)=>new Date(b.startDate)-new Date(a.startDate));archiveListEl.innerHTML=list.length?list.map(c=>createCard(c)).join(''):'<div style="text-align:center;color:#888;padding:20px;">Пусто</div>';}
+function createCard(c){const isDone=c.status==='done';const date=new Date(c.startDate);const today=new Date();today.setHours(0,0,0,0);date.setHours(0,0,0,0);const diffDays=Math.ceil((date-today)/(1000*60*60*24));let badgeClass='badge';let badgeText=diffDays+'дн.';if(diffDays===0){badgeClass+=' today';badgeText='Сегодня';}else if(diffDays===1){badgeClass+=' tomorrow';badgeText='Завтра';}else if(diffDays<0){badgeClass+=' past';badgeText='Прошло';}if(isDone){badgeClass='badge';badgeText='Архив '+c.startDate;}return `<div class="card candidate-item"><div class="candidate-header"><div><div style="font-weight:bold;">${c.fio} ${!isDone?`<span class="${badgeClass}">${badgeText}</span>`:''}</div><div class="meta">${c.object} • ${c.phone}</div></div></div>${c.note?`<div style="font-size:0.9rem;color:#666;background:#f9f9f9;padding:5px;">${c.note}</div>`:''}<div class="actions">${!isDone?`<button class="btn btn-outline btn-sm" onclick="addToCalendar('${c.id}')">📅</button><button class="btn btn-outline btn-sm" onclick="shareToTG('${c.id}')">✈ TG</button><button class="btn btn-outline btn-sm" onclick="edit('${c.id}')">✎</button><button class="btn btn-sm" onclick="updateStatus('${c.id}','done')" style="background:var(--success)">✓</button>`:`<button class="btn btn-outline btn-sm" onclick="updateStatus('${c.id}','active')">↺</button>`}<button class="btn btn-danger btn-sm" onclick="remove('${c.id}')" style="margin-left:auto">🗑</button></div></div>`;}
+function updateStats(){const active=candidates.filter(c=>c.status==='active');const today=new Date();today.setHours(0,0,0,0);const tomorrow=new Date(today);tomorrow.setDate(today.getDate()+1);const countToday=active.filter(c=>{const d=new Date(c.startDate);d.setHours(0,0,0,0);return d.getTime()===today.getTime()}).length;const countTomorrow=active.filter(c=>{const d=new Date(c.startDate);d.setHours(0,0,0,0);return d.getTime()===tomorrow.getTime()}).length;activeCountEl.innerText=active.length?`(${active.length})`:  '';statsBarEl.innerHTML=`<div class="stat-box"><div class="stat-val">${active.length}</div><div class="stat-label">Актив</div></div><div class="stat-box"><div class="stat-val">${countToday}</div><div class="stat-label">Сегодня</div></div><div class="stat-box"><div class="stat-val">${countTomorrow}</div><div class="stat-label">Завтра</div></div><div class="stat-box"><div class="stat-val">${candidates.filter(c=>c.status==='done').length}</div><div class="stat-label">Архив</div></div>`;}
+function showToast(msg){const t=document.getElementById('toast');t.innerText=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+  </script>
+</body>
+</html>
+  <div id="toast" class="toast"></div>
