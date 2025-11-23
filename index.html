@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Трекер Кандидатов</title>
-    <!-- Version 3.1 Telegram Integrated -->
+    <!-- Version 3.2 Anti-CORS Fix -->
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Segoe UI',Tahoma,Geneva,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:10px;color:#333}
@@ -135,29 +135,30 @@
         </div>
 
         <div class="footer">
-            Трекер кандидатов v3.1 | EG-Staff
+            Трекер кандидатов v3.2 | EG-Staff
         </div>
     </div>
 
     <script>
-        // Данные Telegram (ВШИТЫ)
         const TG_TOKEN = "8261062029:AAE4T8b7cAfmau-j0N2HM1C_JlwS79KaGTw";
         const TG_CHAT_ID = "7178653686";
 
         let candidates = JSON.parse(localStorage.getItem('candidates')) || [];
 
-        // Функция отправки в Telegram
+        // ХАК ДЛЯ ОБХОДА БЛОКИРОВОК БРАУЗЕРА
         function sendTelegram(text) {
             const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=Markdown`;
-            fetch(url).then(r => {
-                if(r.ok) console.log('TG Sent');
-                else console.error('TG Error');
-            }).catch(e => console.error(e));
+            
+            // Метод 1: Невидимая картинка (работает почти везде)
+            new Image().src = url;
+            
+            // Метод 2: Fetch no-cors (для подстраховки)
+            fetch(url, { mode: 'no-cors' }).catch(e => console.log('Send error', e));
         }
 
         function testTelegram() {
-            sendTelegram("🔔 Тестовое уведомление из Трекера!");
-            alert("Запрос отправлен! Проверьте Telegram.");
+            sendTelegram("🔔 Тестовое уведомление (Anti-CORS режим)");
+            alert("Отправлено! Проверьте ТГ через 5-10 секунд.");
         }
 
         function addCandidate(e) {
@@ -186,18 +187,18 @@
             candidates.push(candidate);
             localStorage.setItem('candidates', JSON.stringify(candidates));
 
-            // ОТПРАВКА В ТЕЛЕГРАМ
+            // ОТПРАВКА
             let msg = `👤 *Новый кандидат!*\n\n📛 *${name}*\n💼 ${position}\n📱 ${phone}\n📅 Выход: ${startDate}\n📝 ${notes}`;
             sendTelegram(msg);
 
-            alert('Кандидат добавлен, уведомление отправлено!');
+            alert('Кандидат добавлен, уведомление летит!');
             document.querySelector('form').reset();
             render();
             showTab('active');
         }
 
         function deleteCandidate(id) {
-            if (confirm('Удалить кандидата безвозвратно?')) {
+            if (confirm('Удалить навсегда?')) {
                 candidates = candidates.filter(c => c.id !== id);
                 localStorage.setItem('candidates', JSON.stringify(candidates));
                 render();
@@ -233,7 +234,6 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tab).classList.add('active');
             
-            // Находим кнопку, которая соответствует табу
             const buttons = document.querySelectorAll('.tab-btn');
             if(tab === 'add') buttons[0].classList.add('active');
             if(tab === 'active') buttons[1].classList.add('active');
@@ -258,7 +258,6 @@
             let active = candidates.filter(c => !c.archived);
             let archived = candidates.filter(c => c.archived);
 
-            // Статистика
             let today = new Date();
             today.setHours(0,0,0,0);
             
@@ -282,7 +281,6 @@
             document.getElementById('tomorrow').textContent = tomorrowCount;
             document.getElementById('archived').textContent = archived.length;
 
-            // Рендер активных
             let activeHTML = active.length ? active.map(c => `
                 <div class="card">
                     <div class="card-title">
@@ -300,7 +298,6 @@
                 </div>
             `).join('') : '<div class="empty"><h3>Нет активных кандидатов</h3></div>';
 
-            // Рендер архива
             let archiveHTML = archived.length ? archived.map(c => `
                 <div class="card">
                     <div class="card-title">${c.name} <span class="badge badge-archive">Архив</span></div>
@@ -317,7 +314,6 @@
             document.getElementById('archiveList').innerHTML = archiveHTML;
         }
 
-        // Инициализация
         render();
     </script>
 </body>
