@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Трекер Кандидатов</title>
-    <!-- Version 3.2 Anti-CORS Fix -->
+    <!-- Version 3.3 Single Send Fix -->
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Segoe UI',Tahoma,Geneva,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:10px;color:#333}
@@ -135,7 +135,7 @@
         </div>
 
         <div class="footer">
-            Трекер кандидатов v3.2 | EG-Staff
+            Трекер кандидатов v3.3 | EG-Staff
         </div>
     </div>
 
@@ -145,20 +145,17 @@
 
         let candidates = JSON.parse(localStorage.getItem('candidates')) || [];
 
-        // ХАК ДЛЯ ОБХОДА БЛОКИРОВОК БРАУЗЕРА
+        // ОТПРАВКА ТОЛЬКО ОДНИМ МЕТОДОМ (чтобы не двоилось)
         function sendTelegram(text) {
             const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=Markdown`;
             
-            // Метод 1: Невидимая картинка (работает почти везде)
-            new Image().src = url;
-            
-            // Метод 2: Fetch no-cors (для подстраховки)
+            // Используем только fetch с no-cors
             fetch(url, { mode: 'no-cors' }).catch(e => console.log('Send error', e));
         }
 
         function testTelegram() {
-            sendTelegram("🔔 Тестовое уведомление (Anti-CORS режим)");
-            alert("Отправлено! Проверьте ТГ через 5-10 секунд.");
+            sendTelegram("🔔 Тестовое уведомление (Fixed)");
+            alert("Отправлено!");
         }
 
         function addCandidate(e) {
@@ -191,7 +188,7 @@
             let msg = `👤 *Новый кандидат!*\n\n📛 *${name}*\n💼 ${position}\n📱 ${phone}\n📅 Выход: ${startDate}\n📝 ${notes}`;
             sendTelegram(msg);
 
-            alert('Кандидат добавлен, уведомление летит!');
+            alert('Кандидат добавлен!');
             document.querySelector('form').reset();
             render();
             showTab('active');
