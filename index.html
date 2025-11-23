@@ -1,82 +1,324 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Трекер Кандидатов</title>
-<!-- Version 3.0 UI Redesign v2.2 2025-11-21 -->
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Tahoma,Geneva,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:10px;color:#333}
-.container{max-width:900px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;min-height:100vh}
-.header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:30px 20px;text-align:center}
-.header h1{font-size:2em;font-weight:700;margin-bottom:10px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
-.stat{background:rgba(255,255,255,.2);padding:15px;border-radius:10px;text-align:center}
-.stat strong{font-size:1.5em;display:block}
-.stat small{opacity:.9;font-size:.85em}
-.tabs{display:flex;gap:5px;padding:15px 20px;background:#f8f9fa;border-bottom:2px solid #e9ecef;flex-wrap:wrap}
-.tab-btn{padding:12px 20px;border:2px solid transparent;background:#fff;color:#667eea;border-radius:10px;cursor:pointer;font-weight:600;transition:all .3s}
-.tab-btn:hover{background:#f0f2ff;transform:translateY(-2px)}
-.tab-btn.active{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:2px solid #667eea;box-shadow:0 4px 12px rgba(102,126,234,.4)}
-.content{flex:1;overflow-y:auto;padding:25px;background:#fafbfc}
-.tab-content{display:none}
-.tab-content.active{display:block;animation:fadeIn .3s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.form-group{margin-bottom:18px}
-label{display:block;margin-bottom:8px;font-weight:600;font-size:.95em}
-input[type=text],input[type=tel],input[type=date],textarea{width:100%;padding:12px;border:2px solid #e9ecef;border-radius:8px;font-size:1em;transition:all .3s;font-family:inherit}
-input[type=text]:focus,input[type=tel]:focus,input[type=date]:focus,textarea:focus{outline:0;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
-textarea{resize:vertical;min-height:100px}
-.btn{padding:12px 28px;border:0;border-radius:8px;font-weight:600;cursor:pointer;transition:all .3s;font-size:1em;text-transform:uppercase}
-.btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;width:100%;box-shadow:0 4px 12px rgba(102,126,234,.4)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(102,126,234,.6)}
-.btn-small{padding:8px 12px;font-size:.85em;margin-right:8px}
-.btn-success{background:#10b981;color:#fff}
-.btn-danger{background:#ef4444;color:#fff}
-.btn-info{background:#3b82f6;color:#fff}
-.btn-small:hover{transform:scale(1.05);box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
-.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);border-left:4px solid #667eea;animation:slideIn .3s;transition:all .3s}
-.card:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,.15)}
-@keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.card-title{font-size:1.2em;font-weight:700;margin-bottom:12px;color:#333;display:flex;justify-content:space-between;align-items:center}
-.badge{display:inline-block;padding:5px 12px;border-radius:20px;font-size:.8em;font-weight:600;text-transform:uppercase}
-.badge-today{background:#fecaca;color:#991b1b}
-.badge-tomorrow{background:#fcd34d;color:#78350f}
-.badge-archive{background:#d1d5db;color:#374151}
-.card-field{margin-bottom:12px;display:flex;justify-content:space-between}
-.card-field strong{color:#667eea;font-weight:600}
-.card-field span{color:#666;text-align:right;max-width:50%}
-.card-actions{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:2px solid #f0f0f0}
-.empty{text-align:center;padding:60px 20px;color:#999}
-.empty h3{font-size:1.3em;margin-bottom:10px;color:#666}
-.footer{background:#f8f9fa;padding:15px 20px;text-align:center;color:#999;font-size:.85em;border-top:1px solid #e9ecef}
-@media(max-width:768px){
-.header h1{font-size:1.5em}
-.stats{grid-template-columns:repeat(2,1fr)}
-.cards{grid-template-columns:1fr}
-.card-field{flex-direction:column}
-.card-field span{max-width:100%;text-align:left}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Трекер Кандидатов</title>
+    <!-- Version 3.1 Telegram Integrated -->
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',Tahoma,Geneva,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:10px;color:#333}
+        .container{max-width:900px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;min-height:100vh}
+        .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:30px 20px;text-align:center}
+        .header h1{font-size:2em;font-weight:700;margin-bottom:10px}
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
+        .stat{background:rgba(255,255,255,.2);padding:15px;border-radius:10px;text-align:center}
+        .stat strong{font-size:1.5em;display:block}
+        .stat small{opacity:.9;font-size:.85em}
+        .tabs{display:flex;gap:5px;padding:15px 20px;background:#f8f9fa;border-bottom:2px solid #e9ecef;flex-wrap:wrap}
+        .tab-btn{padding:12px 20px;border:2px solid transparent;background:#fff;color:#667eea;border-radius:10px;cursor:pointer;font-weight:600;transition:all .3s}
+        .tab-btn:hover{background:#f0f2ff;transform:translateY(-2px)}
+        .tab-btn.active{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:2px solid #667eea;box-shadow:0 4px 12px rgba(102,126,234,.4)}
+        .content{flex:1;overflow-y:auto;padding:25px;background:#fafbfc}
+        .tab-content{display:none}
+        .tab-content.active{display:block;animation:fadeIn .3s}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .form-group{margin-bottom:18px}
+        label{display:block;margin-bottom:8px;font-weight:600;font-size:.95em}
+        input[type=text],input[type=tel],input[type=date],textarea{width:100%;padding:12px;border:2px solid #e9ecef;border-radius:8px;font-size:1em;transition:all .3s;font-family:inherit}
+        input[type=text]:focus,input[type=tel]:focus,input[type=date]:focus,textarea:focus{outline:0;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
+        textarea{resize:vertical;min-height:100px}
+        .btn{padding:12px 28px;border:0;border-radius:8px;font-weight:600;cursor:pointer;transition:all .3s;font-size:1em;text-transform:uppercase}
+        .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;width:100%;box-shadow:0 4px 12px rgba(102,126,234,.4)}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(102,126,234,.6)}
+        .btn-small{padding:8px 12px;font-size:.85em;margin-right:8px}
+        .btn-success{background:#10b981;color:#fff}
+        .btn-danger{background:#ef4444;color:#fff}
+        .btn-info{background:#3b82f6;color:#fff}
+        .btn-warning{background:#f59e0b;color:#fff}
+        .btn-small:hover{transform:scale(1.05);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+        .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+        .card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);border-left:4px solid #667eea;animation:slideIn .3s;transition:all .3s}
+        .card:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,.15)}
+        @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .card-title{font-size:1.2em;font-weight:700;margin-bottom:12px;color:#333;display:flex;justify-content:space-between;align-items:center}
+        .badge{display:inline-block;padding:5px 12px;border-radius:20px;font-size:.8em;font-weight:600;text-transform:uppercase}
+        .badge-today{background:#fecaca;color:#991b1b}
+        .badge-tomorrow{background:#fcd34d;color:#78350f}
+        .badge-archive{background:#d1d5db;color:#374151}
+        .card-field{margin-bottom:12px;display:flex;justify-content:space-between}
+        .card-field strong{color:#667eea;font-weight:600}
+        .card-field span{color:#666;text-align:right;max-width:50%}
+        .card-actions{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:2px solid #f0f0f0}
+        .empty{text-align:center;padding:60px 20px;color:#999}
+        .empty h3{font-size:1.3em;margin-bottom:10px;color:#666}
+        .footer{background:#f8f9fa;padding:15px 20px;text-align:center;color:#999;font-size:.85em;border-top:1px solid #e9ecef}
+        @media(max-width:768px){
+            .header h1{font-size:1.5em}
+            .stats{grid-template-columns:repeat(2,1fr)}
+            .cards{grid-template-columns:1fr}
+            .card-field{flex-direction:column}
+            .card-field span{max-width:100%;text-align:left}
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-<div class="header">
-<h1>킢рекер Кандидатов</h1>
-<p>Управление рекрутингом и напоминания в Telegram</p>
-<div class="stats">
-<div class="stat"><strong id="total">0</strong><small>Активных</small></div>
-<div class="stat"><strong id="today">0</strong><small>Сегодня</small></div>
-<div class="stat"><strong id="tomorrow">0</strong><small>Завтра</small></div>
-<div class="stat"><strong id="archived">0</strong><small>Архив</small></div>
-</div>
-</div>
-<div class="tabs">
-<button class="tab-btn active" onclick="showTab('add')">+ Добавить</button>
-<button class="tab-btn" onclick="showTab('active')">킬 Активные</button>
-<button class="tab-btn" onclick="showTab('archive')">📦 Архив</button>
-<button class="tab-btn" onclick="showTab('settings')">⚙️ Настройки</button>
-</div>
-<div class="content"><div id="add" class="tab-content active"><h2 style="margin-bottom:20px;color:#333">Добавить кандидата</h2><form onsubmit="addCandidate(event)" style="max-width:600px"><div class="form-group"><label>ФИО*</label><input type="text" id="name" required></div><div class="form-group"><label>Должность*</label><input type="text" id="position" required></div><div class="form-group"><label>Телефон*</label><input type="tel" id="phone" required></div><div class="form-group"><label>Дата начала*</label><input type="date" id="startDate" required></div><div class="form-group"><label>Заметки</label><textarea id="notes"></textarea></div><button type="submit" class="btn btn-primary">Добавить</button></form></div><div id="active" class="tab-content"><h2 style="margin-bottom:20px">Активные</h2><div id="activeList" class="cards"></div></div><div id="archive" class="tab-content"><h2 style="margin-bottom:20px">Архив</h2><div id="archiveList" class="cards"></div></div><div id="settings" class="tab-content"><h2 style="margin-bottom:20px">Настройки</h2><div style="display:grid;gap:20px"><div style="background:#fff;padding:20px;border-radius:12px"><h3>Токен бота</h3><input type="text" id="botToken" placeholder="Token"><button type="button" class="btn btn-small btn-success" onclick="saveBotToken()">Сохранить</button></div><div style="background:#fff;padding:20px;border-radius:12px"><h3>ID чата</h3><input type="text" id="chatId" placeholder="ID"><button type="button" class="btn btn-small btn-success" onclick="saveChatId()">Сохранить</button></div><div style="background:#fff;padding:20px;border-radius:12px"><h3>Google Apps Script URL</h3><input type="text" id="gasUrl" placeholder="URL"><button type="button" class="btn btn-small btn-info" onclick="saveGasUrl()">Сохранить</button></div><div style="background:#fff;padding:20px;border-radius:12px"><h3>Статус</h3><p id="status">Проверка...</p><button type="button" class="btn btn-small btn-warning" onclick="testTelegram()">Тестировать</button></div></div></div></div><div class="footer">Трекер кандидатов v3.0</div></div><script>let botToken=localStorage.getItem('botToken')||'';let chatId=localStorage.getItem('chatId')||'';let gasUrl=localStorage.getItem('gasUrl')||'';let candidates=JSON.parse(localStorage.getItem('candidates'))||[];function loadSettings(){botToken=localStorage.getItem('botToken')||'';chatId=localStorage.getItem('chatId')||'';gasUrl=localStorage.getItem('gasUrl')||'';document.getElementById('botToken').value=botToken;document.getElementById('chatId').value=chatId;document.getElementById('gasUrl').value=gasUrl;updateStatus();}function saveBotToken(){botToken=document.getElementById('botToken').value;localStorage.setItem('botToken',botToken);alert('Токен сохранён');updateStatus();}function saveChatId(){chatId=document.getElementById('chatId').value;localStorage.setItem('chatId',chatId);alert('ID сохранён');updateStatus();}function saveGasUrl(){gasUrl=document.getElementById('gasUrl').value;localStorage.setItem('gasUrl',gasUrl);alert('URL сохранён');updateStatus();}function updateStatus(){let status=document.getElementById('status');if(botToken&&chatId&&gasUrl){status.textContent='✅ Конфигурация готова';status.style.color='#10b981'}else{status.textContent='⚠️ Заполните все поля';status.style.color='#f59e0b'}}function testTelegram(){if(!botToken||!chatId||!gasUrl){alert('Заполните!');return}let msg='Тест подключения';fetch(gasUrl,{method:'POST',mode:'no-cors',body:JSON.stringify({message:msg})}).then(()=>alert('Отправлено!')).catch(e=>alert('Ошибка: '+e));}function addCandidate(e){e.preventDefault();let name=document.getElementById('name').value;let position=document.getElementById('position').value;let phone=document.getElementById('phone').value;let startDate=document.getElementById('startDate').value;let notes=document.getElementById('notes').value;if(!name||!position||!phone||!startDate){alert('заполните!');return}let candidate={id:Date.now(),name,position,phone,startDate,notes,archived:false};candidates.push(candidate);localStorage.setItem('candidates',JSON.stringify(candidates));alert('добавлен!');document.querySelector('form').reset();render();showTab('active');}function deleteCandidate(id){if(confirm('Удалить?')){candidates=candidates.filter(c=>c.id!==id);localStorage.setItem('candidates',JSON.stringify(candidates));render()}}function toggleArchive(id){let candidate=candidates.find(c=>c.id===id);if(candidate){candidate.archived=!candidate.archived;localStorage.setItem('candidates',JSON.stringify(candidates));render()}}function editCandidate(id){let candidate=candidates.find(c=>c.id===id);if(!candidate)return;let newName=prompt('ФИО:',candidate.name);if(newName===null)return;candidate.name=newName;candidate.position=prompt('Должность:',candidate.position)||candidate.position;candidate.phone=prompt('Телефон:',candidate.phone)||candidate.phone;localStorage.setItem('candidates',JSON.stringify(candidates));render();}function showTab(tab){document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));document.getElementById(tab).classList.add('active');let btn=event.target;if(btn)btn.classList.add('active');if(tab==='settings')loadSettings();}function getDaysBadge(date){let today=new Date();today.setHours(0,0,0,0);let candidateDate=new Date(date);candidateDate.setHours(0,0,0,0);let diff=(candidateDate-today)/(1000*60*60*24);if(diff===0)return '<span class="badge badge-today">Сегодня</span>';if(diff===1)return '<span class="badge badge-tomorrow">Завтра</span>';return''}function render(){let active=candidates.filter(c=>!c.archived);let archived=candidates.filter(c=>c.archived);let today=new Date();today.setHours(0,0,0,0);let todayCount=active.filter(c=>{let d=new Date(c.startDate);d.setHours(0,0,0,0);return d.getTime()===today.getTime()}).length;let tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);let tomorrowCount=active.filter(c=>{let d=new Date(c.startDate);d.setHours(0,0,0,0);return d.getTime()===tomorrow.getTime()}).length;document.getElementById('total').textContent=active.length;document.getElementById('today').textContent=todayCount;document.getElementById('tomorrow').textContent=tomorrowCount;document.getElementById('archived').textContent=archived.length;let activeHTML=active.length?active.map(c=>`<div class="card"><div class="card-title">${c.name} ${getDaysBadge(c.startDate)}</div><div class="card-field"><strong>Должность:</strong><span>${c.position}</span></div><div class="card-field"><strong>Телефон:</strong><span>${c.phone}</span></div><div class="card-field"><strong>Начало:</strong><span>${c.startDate}</span></div>${c.notes?`<div class="card-field"><strong>Заметки:</strong><span>${c.notes}</span></div>`:''}<div class="card-actions"><button class="btn btn-small btn-info" onclick="editCandidate(${c.id})">&#9998; Оредактировать</button><button class="btn btn-small btn-success" onclick="toggleArchive(${c.id})">✔ Завершено</button><button class="btn btn-small btn-danger" onclick="deleteCandidate(${c.id})">удалить</button></div></div>`).join(''):'<div class="empty"><h3>Нет кандидатов</h3></div>';let archiveHTML=archived.length?archived.map(c=>`<div class="card"><div class="card-title">${c.name}</div><div class="card-field"><strong>Должность:</strong><span>${c.position}</span></div><div class="card-field"><strong>Телефон:</strong><span>${c.phone}</span></div><div class="card-actions"><button class="btn btn-small btn-warning" onclick="toggleArchive(${c.id})">BACK</button><button class="btn btn-small btn-danger" onclick="deleteCandidate(${c.id})">Удалить</button></div></div>`).join(''):'<div class="empty"><h3>Архив пуст</h3></div>';document.getElementById('activeList').innerHTML=activeHTML;document.getElementById('archiveList').innerHTML=archiveHTML;}render();</script></body></html>
+    <div class="container">
+        <div class="header">
+            <h1>Трекер Кандидатов</h1>
+            <p>Управление рекрутингом и напоминания в Telegram</p>
+            <div class="stats">
+                <div class="stat"><strong id="total">0</strong><small>Активных</small></div>
+                <div class="stat"><strong id="today">0</strong><small>Сегодня</small></div>
+                <div class="stat"><strong id="tomorrow">0</strong><small>Завтра</small></div>
+                <div class="stat"><strong id="archived">0</strong><small>Архив</small></div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('add')">+ Добавить</button>
+            <button class="tab-btn" onclick="showTab('active')">📋 Активные</button>
+            <button class="tab-btn" onclick="showTab('archive')">📦 Архив</button>
+            <button class="tab-btn" onclick="showTab('settings')">⚙️ Настройки</button>
+        </div>
+
+        <div class="content">
+            <!-- Вкладка Добавить -->
+            <div id="add" class="tab-content active">
+                <h2 style="margin-bottom:20px;color:#333">Добавить кандидата</h2>
+                <form onsubmit="addCandidate(event)" style="max-width:600px">
+                    <div class="form-group">
+                        <label>ФИО*</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Должность*</label>
+                        <input type="text" id="position" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон*</label>
+                        <input type="tel" id="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Дата начала*</label>
+                        <input type="date" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Заметки</label>
+                        <textarea id="notes"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить в базу</button>
+                </form>
+            </div>
+
+            <!-- Вкладка Активные -->
+            <div id="active" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#333">Активные кандидаты</h2>
+                <div id="activeList" class="cards"></div>
+            </div>
+
+            <!-- Вкладка Архив -->
+            <div id="archive" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#333">Архив (История)</h2>
+                <div id="archiveList" class="cards"></div>
+            </div>
+
+            <!-- Вкладка Настройки -->
+            <div id="settings" class="tab-content">
+                <h2 style="margin-bottom:20px;color:#333">Настройки</h2>
+                <p>Telegram бот настроен автоматически.</p>
+                <div style="margin-top:20px; padding:15px; background:#e0f2fe; border-radius:8px; color:#0369a1;">
+                    <strong>Статус бота:</strong> <span id="botStatus">✅ Подключен</span>
+                </div>
+                <button onclick="testTelegram()" class="btn btn-primary" style="margin-top:20px">Тестовое сообщение</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            Трекер кандидатов v3.1 | EG-Staff
+        </div>
+    </div>
+
+    <script>
+        // Данные Telegram (ВШИТЫ)
+        const TG_TOKEN = "8261062029:AAE4T8b7cAfmau-j0N2HM1C_JlwS79KaGTw";
+        const TG_CHAT_ID = "7178653686";
+
+        let candidates = JSON.parse(localStorage.getItem('candidates')) || [];
+
+        // Функция отправки в Telegram
+        function sendTelegram(text) {
+            const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}&parse_mode=Markdown`;
+            fetch(url).then(r => {
+                if(r.ok) console.log('TG Sent');
+                else console.error('TG Error');
+            }).catch(e => console.error(e));
+        }
+
+        function testTelegram() {
+            sendTelegram("🔔 Тестовое уведомление из Трекера!");
+            alert("Запрос отправлен! Проверьте Telegram.");
+        }
+
+        function addCandidate(e) {
+            e.preventDefault();
+            let name = document.getElementById('name').value;
+            let position = document.getElementById('position').value;
+            let phone = document.getElementById('phone').value;
+            let startDate = document.getElementById('startDate').value;
+            let notes = document.getElementById('notes').value;
+
+            if (!name || !position || !phone || !startDate) {
+                alert('Заполните обязательные поля!');
+                return;
+            }
+
+            let candidate = {
+                id: Date.now(),
+                name,
+                position,
+                phone,
+                startDate,
+                notes,
+                archived: false
+            };
+
+            candidates.push(candidate);
+            localStorage.setItem('candidates', JSON.stringify(candidates));
+
+            // ОТПРАВКА В ТЕЛЕГРАМ
+            let msg = `👤 *Новый кандидат!*\n\n📛 *${name}*\n💼 ${position}\n📱 ${phone}\n📅 Выход: ${startDate}\n📝 ${notes}`;
+            sendTelegram(msg);
+
+            alert('Кандидат добавлен, уведомление отправлено!');
+            document.querySelector('form').reset();
+            render();
+            showTab('active');
+        }
+
+        function deleteCandidate(id) {
+            if (confirm('Удалить кандидата безвозвратно?')) {
+                candidates = candidates.filter(c => c.id !== id);
+                localStorage.setItem('candidates', JSON.stringify(candidates));
+                render();
+            }
+        }
+
+        function toggleArchive(id) {
+            let candidate = candidates.find(c => c.id === id);
+            if (candidate) {
+                candidate.archived = !candidate.archived;
+                localStorage.setItem('candidates', JSON.stringify(candidates));
+                render();
+            }
+        }
+
+        function editCandidate(id) {
+            let candidate = candidates.find(c => c.id === id);
+            if (!candidate) return;
+            
+            let newName = prompt('ФИО:', candidate.name);
+            if (newName === null) return;
+            
+            candidate.name = newName;
+            candidate.position = prompt('Должность:', candidate.position) || candidate.position;
+            candidate.phone = prompt('Телефон:', candidate.phone) || candidate.phone;
+            
+            localStorage.setItem('candidates', JSON.stringify(candidates));
+            render();
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            
+            // Находим кнопку, которая соответствует табу
+            const buttons = document.querySelectorAll('.tab-btn');
+            if(tab === 'add') buttons[0].classList.add('active');
+            if(tab === 'active') buttons[1].classList.add('active');
+            if(tab === 'archive') buttons[2].classList.add('active');
+            if(tab === 'settings') buttons[3].classList.add('active');
+        }
+
+        function getDaysBadge(date) {
+            let today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let candidateDate = new Date(date);
+            candidateDate.setHours(0, 0, 0, 0);
+            
+            let diff = (candidateDate - today) / (1000 * 60 * 60 * 24);
+            
+            if (diff === 0) return '<span class="badge badge-today">Сегодня</span>';
+            if (diff === 1) return '<span class="badge badge-tomorrow">Завтра</span>';
+            return '';
+        }
+
+        function render() {
+            let active = candidates.filter(c => !c.archived);
+            let archived = candidates.filter(c => c.archived);
+
+            // Статистика
+            let today = new Date();
+            today.setHours(0,0,0,0);
+            
+            let todayCount = active.filter(c => {
+                let d = new Date(c.startDate);
+                d.setHours(0,0,0,0);
+                return d.getTime() === today.getTime();
+            }).length;
+
+            let tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            let tomorrowCount = active.filter(c => {
+                let d = new Date(c.startDate);
+                d.setHours(0,0,0,0);
+                return d.getTime() === tomorrow.getTime();
+            }).length;
+
+            document.getElementById('total').textContent = active.length;
+            document.getElementById('today').textContent = todayCount;
+            document.getElementById('tomorrow').textContent = tomorrowCount;
+            document.getElementById('archived').textContent = archived.length;
+
+            // Рендер активных
+            let activeHTML = active.length ? active.map(c => `
+                <div class="card">
+                    <div class="card-title">
+                        ${c.name} ${getDaysBadge(c.startDate)}
+                    </div>
+                    <div class="card-field"><strong>Должность:</strong><span>${c.position}</span></div>
+                    <div class="card-field"><strong>Телефон:</strong><span>${c.phone}</span></div>
+                    <div class="card-field"><strong>Начало:</strong><span>${c.startDate}</span></div>
+                    ${c.notes ? `<div class="card-field"><strong>Заметки:</strong><span>${c.notes}</span></div>` : ''}
+                    <div class="card-actions">
+                        <button class="btn btn-small btn-info" onclick="editCandidate(${c.id})">✏️ Изменить</button>
+                        <button class="btn btn-small btn-success" onclick="toggleArchive(${c.id})">✅ В архив</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteCandidate(${c.id})">🗑</button>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty"><h3>Нет активных кандидатов</h3></div>';
+
+            // Рендер архива
+            let archiveHTML = archived.length ? archived.map(c => `
+                <div class="card">
+                    <div class="card-title">${c.name} <span class="badge badge-archive">Архив</span></div>
+                    <div class="card-field"><strong>Должность:</strong><span>${c.position}</span></div>
+                    <div class="card-field"><strong>Телефон:</strong><span>${c.phone}</span></div>
+                    <div class="card-actions">
+                        <button class="btn btn-small btn-warning" onclick="toggleArchive(${c.id})">🔙 Вернуть</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteCandidate(${c.id})">🗑 Удалить</button>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty"><h3>Архив пуст</h3></div>';
+
+            document.getElementById('activeList').innerHTML = activeHTML;
+            document.getElementById('archiveList').innerHTML = archiveHTML;
+        }
+
+        // Инициализация
+        render();
+    </script>
+</body>
+</html>
